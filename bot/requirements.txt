@@ -16,3 +16,9 @@ pydantic_core==2.33.2
 typing-inspection==0.4.2
 typing_extensions==4.15.0
 yarl==1.22.0
+chromadb>=0.4.22
+langchain>=0.1.0
+langchain-community>=0.0.10
+sentence-transformers>=2.2.2
+python-dotenv>=1.0.0
+ollama>=0.1.0  # для локальной модели
