@@ -6,20 +6,19 @@ from app.handlers import router
 
 TOKEN = None
 
-with open("../.env", "r", encoding="utf-8") as f:
+# импорт токена из .env
+with open("../.env") as f:
     for line in f:
         line = line.strip()
-
         if not line or line.startswith("#"):
             continue
-
         if line.startswith("TOKEN="):
             TOKEN = line.split("=", 1)[1]
             break
 
 
 async def main():
-    bot = Bot(token=TOKEN)
+    bot = Bot(token=TOKEN) # type: ignore
     dp = Dispatcher()
     dp.include_router(router)
     await dp.start_polling(bot)
