@@ -4,7 +4,18 @@ from aiogram import Bot, Dispatcher
 from app.handlers import router
 
 
-TOKEN = "8502914049:AAEDhl1LGRMgk9t8E3vF3riEjOSzwcVWbGw"
+TOKEN = None
+
+with open("../.env", "r", encoding="utf-8") as f:
+    for line in f:
+        line = line.strip()
+
+        if not line or line.startswith("#"):
+            continue
+
+        if line.startswith("TOKEN="):
+            TOKEN = line.split("=", 1)[1]
+            break
 
 
 async def main():
