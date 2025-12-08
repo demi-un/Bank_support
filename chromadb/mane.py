@@ -1,20 +1,46 @@
 import chromadb
-chroma_client = chromadb.Client()
+from sentence_transformers import SentenceTransformer
 
-collection = chroma_client.create_collection(name="bank_support")
+# инициализация векторизатора
+model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
 
+# создаём/подключаем Chroma
+client = chromadb.PersistentClient(path="maindb")
+collection = client.get_or_create_collection(
+    name="faq",
+    metadata={"hnsw:space": "cosine"}  # метрика расстояния
+)
+
+# данные
+data = {
+    "Как зовут основателя UNIBANK": "demi-un",
+    "Как заблокировать карту": (
+        "В приложении банка перейти к списку карт, "
+        "нажать на нужную карту, открыть настройки, выбрать «Блокировка»."
+    )
+}
+
+# формируем списки
+texts = list(data.keys())
+answers = list(data.values())
+embeddings = model.encode(texts).tolist()
+
+# добавляем в коллекцию
 collection.add(
-    ids=["id1", "id2"],
-    documents=[
-        "This is a document about pineapple",
-        "This is a document about oranges"
-    ]
+    ids=[f"id_{i}" for i in range(len(texts))],
+    documents=texts,
+    embeddings=embeddings,
+    metadatas=[{"answer": ans} for ans in answers]
 )
 
-results = collection.query(
-    query_texts=["This is a query document about hawaii"], # Chroma will embed this for you
-    n_results=2, # how many results to return
-    include=['metadatas', 'documents', 'distances']
-)
-print(results)
 
+# поиск в db
+query = "Что делать если потерял карту?"
+query_emb = model.encode([query]).tolist()
+
+result = collection.query(
+    query_embeddings=query_emb,
+    n_results=1
+)
+
+print(result)
