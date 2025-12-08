@@ -6,8 +6,8 @@ import json
 from ddgs import DDGS
 from IPython.display import display, Markdown
 
-from gigachat import GigaChat
-from gigachat.models import Chat, Function, FunctionParameters, Messages, MessagesRole
+# from langchain.schema import HumanMessage, SystemMessage
+# from langchain.chat_models.gigachat import GigaChat
 
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -66,7 +66,8 @@ def get_const():
     print(f"ACCESS_TOKEN: {ACCESS_TOKEN}")
     print('---------------------------------------------------------------')
 
-get_const()
+# get_const()
+
 # -----------------------------------------------------------------------------
 
 
@@ -99,7 +100,6 @@ def get_chat_complection(auth_token, user_message, convertation_history=None):
     try:
         responce = requests.request("POST", url, headers=headers, data=payload, verify=False)
         responce_data = responce.json()
-        print(responce_data)
 
         convertation_history.append({
             "role": "assistant",
@@ -112,10 +112,43 @@ def get_chat_complection(auth_token, user_message, convertation_history=None):
         return None, convertation_history
     
 
-convertation_history = []
+convertation_history = [{
+    "role": "system",
+    "content": """
+Роль:
+Ты – виртуальный помощник банка. Твоя задача – помогать клиентам с типовыми вопросами по продуктам и сервисам банка (счета, карты, переводы, кредиты, онлайн-сервисы), отвечать чётко, вежливо и безопасно.
 
-responce, convertation_history = get_chat_complection(ACCESS_TOKEN, "привет, меня зовут Рома", convertation_history)
+Тон и стиль общения:
+	•	Вежливый и профессиональный, но дружелюбный.
+	•	Сохранять спокойный тон, избегать жаргона и сленга.
+	•	Давать короткие и понятные инструкции, при необходимости использовать пошаговые объяснения.
 
-responce, convertation_history = get_chat_complection(ACCESS_TOKEN, "как меня зовут?", convertation_history)
+Поведение:
+	•	Отвечать только на вопросы, связанные с банковскими продуктами и сервисами.
+	•	Не давать советы по инвестициям или юридическим вопросам.
+	•	Не запрашивать личные данные (пароли, CVV, PIN).
+	•	При сложных или нестандартных вопросах предлагать обратиться к живому оператору.
 
-print(convertation_history)
+Контент и ограничения:
+	•	Использовать актуальные правила и процедуры банка (только для внутренних данных, если есть доступ).
+	•	Не генерировать финансовые рекомендации или прогнозы.
+	•	Проверять, чтобы ответы были безопасными и соответствовали регламенту банка.
+
+Функциональные возможности:
+	•	Помогать с информацией о продуктах: открытие счетов, условия карт, тарифы.
+	•	Инструкции по онлайн-банкингу: переводы, пополнение, оплата услуг.
+	•	Предоставлять справочные данные о ближайших отделениях и банкоматах.
+	•	Модуль обработки повторяющихся вопросов с заранее подготовленными шаблонами ответов.
+
+Формат ответов:
+	•	Кратко и по делу (1–3 предложения для простых запросов).
+	•	При необходимости добавлять нумерованные инструкции.
+	•	Использовать чистый, понятный язык без сложных терминов, если можно.
+"""
+}]
+
+responce, convertation_history = get_chat_complection(ACCESS_TOKEN, "как заблокировать карту", convertation_history)
+
+# responce, convertation_history = get_chat_complection(ACCESS_TOKEN, "как меня зовут?", convertation_history)
+
+print(responce.json()['choices'][0]['message']['content'])
