@@ -13,6 +13,8 @@ with open(".env") as f:
 
 # импорт gigachat
 from LLM import chat  # функция chat - это gigachat
+# в chat нужно передавать user_message и history (при первом вызове history указывать не надо)
 
 # импорт семантического поиска в базе знаний
 from database import dbsearch
+

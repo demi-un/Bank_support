@@ -73,7 +73,7 @@ giga = GigaChat(credentials=API_KEY,
                 verify_ssl_certs=False)
 
 
-messages = [SystemMessage(content="""
+SYSTEM_PROMPT = """
 Роль:
 Ты – виртуальный помощник банка. Твоя задача – помогать клиентам с типовыми вопросами по продуктам и сервисам банка (счета, карты, переводы, кредиты, онлайн-сервисы), отвечать чётко, вежливо и безопасно.
 
@@ -103,19 +103,20 @@ messages = [SystemMessage(content="""
 	•	Кратко и по делу (1–3 предложения для простых запросов).
 	•	При необходимости добавлять нумерованные инструкции.
 	•	Использовать чистый, понятный язык без сложных терминов, если можно.
-""")]
+"""
 
 
-def chat():
-    while True:
-        user_input = input("Пользователь: ")
-        if user_input == "q":
-            break
-        messages.append(HumanMessage(content=user_input))
-        answer = giga(messages)
-        messages.append(answer)
-        print("отклик:", answer.content)
+messages = [SystemMessage(content=SYSTEM_PROMPT)]
+def chat(user_message, history=messages):
+    history.append(HumanMessage(content=user_message))
+    answer = giga(history)
+    history.append(answer)
+    return (answer.content, history)
 
 
 if __name__ == "__main__":
-    chat()
+    answer, history = chat("как заблокировать карту")
+    print(answer)
+    # answer, history = chat("Расскажи подробнее про 1 пункт", history)
+    # print(answer)
+
