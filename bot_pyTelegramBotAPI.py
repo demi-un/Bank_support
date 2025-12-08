@@ -16,6 +16,3 @@ from LLM import chat  # функция chat - это gigachat
 
 # импорт семантического поиска в базе знаний
 from database import dbsearch
-
-
-# print(dbsearch("Как заблокировать карту"))

@@ -32,22 +32,23 @@ collection.add(
 )
 
 
-def dbsearch(question: str):
+def dbsearch(question: str, number_of_responses=2):
     question_emb = model.encode([question]).tolist()
 
     response = collection.query(
         query_embeddings=question_emb,
-        n_results=3
+        n_results=number_of_responses
     )
 
-    result = {}
+    result = [[] for _ in range(number_of_responses)]
 
     response_questions = response['documents'][0]
     response_answers = []
     for answer in response['metadatas'][0]:
         response_answers.append(answer['answer'])
-    for i in range(len(response_questions)):
-        result[response_questions[i]] = response_answers[i]
+    for i in range(number_of_responses):
+        result[i].append(response_questions[i])
+        result[i].append(response_answers[i])
 
     return result
 
@@ -55,4 +56,4 @@ def dbsearch(question: str):
 if __name__ == '__main__':
     question = input("Введите вопрос: ")
     result = dbsearch(question)
-    print(json.dumps(result, ensure_ascii=False, indent=2))
+    print(result)
