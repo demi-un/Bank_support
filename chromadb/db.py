@@ -32,29 +32,27 @@ collection.add(
 )
 
 
-# поиск в db
-query = "Не отправляются документы через чат поддержки."
-query_emb = model.encode([query]).tolist()
+def dbsearch(question: str):
+    question_emb = model.encode([question]).tolist()
 
-result = collection.query(
-    query_embeddings=query_emb,
-    n_results=3
-)
+    response = collection.query(
+        query_embeddings=question_emb,
+        n_results=3
+    )
+
+    result = {}
+
+    response_questions = response['documents'][0]
+    response_answers = []
+    for answer in response['metadatas'][0]:
+        response_answers.append(answer['answer'])
+    for i in range(len(response_questions)):
+        result[response_questions[i]] = response_answers[i]
+
+    return result
 
 
-# print(result)
-
-questions = result['documents'][0]
-results = []
-for i in result['metadatas'][0]:
-    results.append(i['answer'])
-
-
-print(f"ИСХОДНЫЙ ВОПРОС: {query}\n")
-
-for i in range(len(questions)):
-    print(f"ВОПРОС {i}: ")
-    print(questions[i])
-    print(f"ОТВЕТ {i}: ")
-    print(results[i])
-    print("")
+if __name__ == '__main__':
+    question = input("Введите вопрос: ")
+    result = dbsearch(question)
+    print(json.dumps(result, ensure_ascii=False, indent=2))

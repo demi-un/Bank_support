@@ -107,11 +107,16 @@ messages = [SystemMessage(content="""
 """)]
 
 
-while True:
-    user_input = input("Пользователь: ")
-    if user_input == "q":
-        break
-    messages.append(HumanMessage(content=user_input))
-    answer = giga(messages)
-    messages.append(answer)
-    print("отклик:", answer.content)
+def chat():
+    while True:
+        user_input = input("Пользователь: ")
+        if user_input == "q":
+            break
+        messages.append(HumanMessage(content=user_input))
+        answer = giga(messages)
+        messages.append(answer)
+        print("отклик:", answer.content)
+
+
+if __name__ == "__main__":
+    chat()
