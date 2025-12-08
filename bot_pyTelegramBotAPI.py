@@ -1,10 +1,7 @@
-import sys
-
-
 TOKEN = None
 
 # импорт токена из .env
-with open("../.env") as f:
+with open(".env") as f:
     for line in f:
         line = line.strip()
         if not line or line.startswith("#"):
@@ -15,13 +12,10 @@ with open("../.env") as f:
 
 
 # импорт gigachat
-sys.path.append("../gigachat")
-from main import chat  # функция chat - это gigachat
-
+from LLM import chat  # функция chat - это gigachat
 
 # импорт семантического поиска в базе знаний
-sys.path.append("../chromadb")
-from db import dbsearch
+from database import dbsearch
 
 
-print(dbsearch("Как заблокировать карту"))
+# print(dbsearch("Как заблокировать карту"))

@@ -1,6 +1,5 @@
 import requests
 import base64
-import json
 
 from langchain.schema import HumanMessage, SystemMessage
 from langchain_gigachat import GigaChat
@@ -16,7 +15,7 @@ CLIENT_SECRET = None
 CLIENT_ID = None
 
 
-with open("../.env") as f:
+with open(".env") as f:
     for line in f:
         if API_KEY and CLIENT_SECRET and CLIENT_ID:
             break

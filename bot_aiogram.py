@@ -7,7 +7,7 @@ from app.handlers import router
 TOKEN = None
 
 # импорт токена из .env
-with open("../.env") as f:
+with open(".env") as f:
     for line in f:
         line = line.strip()
         if not line or line.startswith("#"):
