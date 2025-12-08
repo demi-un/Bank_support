@@ -1,5 +1,6 @@
 import chromadb
 from sentence_transformers import SentenceTransformer
+import json
 
 # инициализация векторизатора
 model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
@@ -12,13 +13,7 @@ collection = client.get_or_create_collection(
 )
 
 # данные
-data = {
-    "Как зовут основателя UNIBANK": "demi-un",
-    "Как заблокировать карту": (
-        "В приложении банка перейти к списку карт, "
-        "нажать на нужную карту, открыть настройки, выбрать «Блокировка»."
-    )
-}
+data = {}
 
 # формируем списки
 texts = list(data.keys())

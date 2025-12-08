@@ -1,13 +1,6 @@
 import requests
 import base64
-
 import json
-
-from ddgs import DDGS
-from IPython.display import display, Markdown
-
-# from langchain.schema import HumanMessage, SystemMessage
-# from langchain.chat_models.gigachat import GigaChat
 
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -151,4 +144,4 @@ responce, convertation_history = get_chat_complection(ACCESS_TOKEN, "как за
 
 # responce, convertation_history = get_chat_complection(ACCESS_TOKEN, "как меня зовут?", convertation_history)
 
-print(responce.json()['choices'][0]['message']['content'])
+print(responce.json()['choices'][0]['message']['content'])  # type: ignore
