@@ -12,6 +12,8 @@ from gigachat.models import Chat, Function, FunctionParameters, Messages, Messag
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
+
+# -----------------------------------------------------------------------------
 # получение всех констант
 API_KEY = None
 CLIENT_SECRET = None
@@ -65,20 +67,26 @@ def get_const():
     print('---------------------------------------------------------------')
 
 get_const()
+# -----------------------------------------------------------------------------
+
 
 # основной код
-def get_chat_complection(auth_token, user_message):
+def get_chat_complection(auth_token, user_message, convertation_history=None):
     url = "https://gigachat.devices.sberbank.ru/api/v1/chat/completions"
+
+    if convertation_history is None:
+        convertation_history = []
+    
+
+    convertation_history.append({
+                "role": "user",
+                "content": user_message
+            })
 
     payload = json.dumps({
         "model": "GigaChat",
-        "messages": [
-            {
-                "role": "user",
-                "content": user_message
-            }
-        ],
-        "temperature": 0.7,
+        "messages": convertation_history,
+        "temperature": 0.3,
         "max_tokens": 250
     })
 
@@ -90,13 +98,24 @@ def get_chat_complection(auth_token, user_message):
 
     try:
         responce = requests.request("POST", url, headers=headers, data=payload, verify=False)
-        return responce
+        responce_data = responce.json()
+        print(responce_data)
+
+        convertation_history.append({
+            "role": "assistant",
+            "content": responce_data['choices'][0]['message']['content']
+        })
+
+        return responce, convertation_history
     except requests.RequestException as e:
         print(f"Произошла ошибка: {str(e)}")
-        return -1
+        return None, convertation_history
     
 
-MESSAGE = "привет"
-answer = get_chat_complection(ACCESS_TOKEN, MESSAGE)
-print(answer.json()['choices'][0]['message']['content']) # type: ignore
+convertation_history = []
 
+responce, convertation_history = get_chat_complection(ACCESS_TOKEN, "привет, меня зовут Рома", convertation_history)
+
+responce, convertation_history = get_chat_complection(ACCESS_TOKEN, "как меня зовут?", convertation_history)
+
+print(convertation_history)
