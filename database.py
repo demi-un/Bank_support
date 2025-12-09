@@ -40,15 +40,15 @@ def dbsearch(question: str, number_of_responses=2):
         n_results=number_of_responses
     )
 
-    result = [[] for _ in range(number_of_responses)]
+    result = ""
 
     response_questions = response['documents'][0]
     response_answers = []
     for answer in response['metadatas'][0]:
         response_answers.append(answer['answer'])
     for i in range(number_of_responses):
-        result[i].append(response_questions[i])
-        result[i].append(response_answers[i])
+        result += f"Вопрос №{i+1}: '{response_questions[i]}' "
+        result += f"Ответ к вопросу №{i+1}: '{response_answers[i]}';"
 
     return result
 

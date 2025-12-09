@@ -19,7 +19,7 @@ with open(".env") as f:
 
 # -----------------------------------------------------------------------------
 # импорт семантического поиска (если используешь)
-# from database import dbsearch
+from database import dbsearch
 
 # -----------------------------------------------------------------------------
 # LLM
@@ -58,9 +58,14 @@ users_history = {}
 
 # функция вызова LLM
 def llm(user_message, user_history):
-    user_history.append(HumanMessage(content=user_message))
+    # поиск в базе по вопросу пользователя
+    db_results = dbsearch(user_message)
+
+    user_history.append(HumanMessage(content=user_message + f"; СИСТЕМНОЕ СООБЩЕНИЕ: Контекст из базы данных (используй его, если он помогает ответить на заданный вопрос):\n{db_results}"))
+
     gigachat_answer = giga.invoke(user_history)
     user_history.append(gigachat_answer)
+
     return gigachat_answer.content, user_history
 
 # -----------------------------------------------------------------------------
