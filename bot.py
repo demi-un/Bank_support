@@ -1,6 +1,6 @@
 import telebot
 from langchain.schema import HumanMessage, SystemMessage
-from langchain.chat_models.gigachat import GigaChat
+from langchain_community.chat_models.gigachat import GigaChat
 
 # -----------------------------------------------------------------------------
 # получение API_KEY и TOKEN из .env
