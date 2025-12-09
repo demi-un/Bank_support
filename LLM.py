@@ -30,7 +30,7 @@ with open(".env") as f:
             CLIENT_ID = line[len("CLIENT_ID="):].strip()
 
 
-def get_acess_token(API_KEY):
+def get_access_token(API_KEY):
     url = "https://ngw.devices.sberbank.ru:9443/api/v2/oauth"
 
     payload = "scope=GIGACHAT_API_PERS"
@@ -53,7 +53,7 @@ def get_acess_token(API_KEY):
 
 auth_str = f"{CLIENT_ID}:{CLIENT_SECRET}"
 API_KEY = base64.b64encode(auth_str.encode()).decode()
-ACCESS_TOKEN = get_acess_token(API_KEY=API_KEY)
+ACCESS_TOKEN = get_access_token(API_KEY=API_KEY)
 
 
 def get_const():
@@ -107,16 +107,16 @@ SYSTEM_PROMPT = """
 
 
 messages = [SystemMessage(content=SYSTEM_PROMPT)]
-def chat(user_message, history=messages):
+def llm(user_message, history=messages):
     history.append(HumanMessage(content=user_message))
-    answer = giga(history)
+    answer = giga.invoke(history)
     history.append(answer)
     return (answer.content, history)
 
 
 if __name__ == "__main__":
-    answer, history = chat("как заблокировать карту")
+    answer, history = llm("как заблокировать карту")
     print(answer)
-    # answer, history = chat("Расскажи подробнее про 1 пункт", history)
+    # answer, history = llm("Расскажи подробнее про 1 пункт", history)
     # print(answer)
 
