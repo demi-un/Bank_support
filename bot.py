@@ -1,5 +1,4 @@
 import telebot
-from sympy.abc import lamda
 from telebot import types
 from langchain.schema import HumanMessage, SystemMessage
 from langchain_community.chat_models.gigachat import GigaChat
