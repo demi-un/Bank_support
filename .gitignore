@@ -6,4 +6,4 @@
 *.pyc
 .env
 test.py
-.idea
+.idea/
