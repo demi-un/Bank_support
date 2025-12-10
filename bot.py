@@ -1,4 +1,6 @@
 import telebot
+from sympy.abc import lamda
+from telebot import types
 from langchain.schema import HumanMessage, SystemMessage
 from langchain_community.chat_models.gigachat import GigaChat
 
@@ -70,14 +72,6 @@ def llm(user_message, user_history):
 # инициализация бота
 bot = telebot.TeleBot(TOKEN)
 
-
-# обработка всех не текстовых сообщений
-@bot.message_handler(content_types=['audio', 'video', 'document', 'photo', 'sticker', 'voice', 'location', 'contact'])
-def not_text(user_message):
-    user_id = user_message.chat.id
-    bot.send_message(user_id, "Я работаю только с текстовыми сообщениями")
-
-
 # /start
 start_message = """
 Стартовое сообщение
@@ -86,8 +80,40 @@ start_message = """
 
 @bot.message_handler(commands=['start'])
 def start(user_message):
+    # клавиатура
+    kb = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
+    btn1 = types.KeyboardButton(text="Кнопка1")
+    btn2 = types.KeyboardButton(text="Кнопка2")
+    kb.add(btn1, btn2)
+
+    # отправка сообщения
     user_id = user_message.chat.id
-    bot.send_message(user_id, start_message)
+    bot.send_message(user_id, start_message, reply_markup=kb)
+
+
+# обработка всех не текстовых сообщений
+@bot.message_handler(content_types=['audio', 'video', 'document', 'photo', 'sticker', 'voice', 'location', 'contact'])
+def not_text(user_message):
+    user_id = user_message.chat.id
+    bot.send_message(user_id, "Я работаю только с текстовыми сообщениями")
+
+
+# Кнопка1
+@bot.message_handler(func=lambda user_message: user_message.text == "Кнопка1")
+def handle_text_message(user_message):
+    user_id = user_message.chat.id
+
+    # отправляем ответ пользователю
+    bot.send_message(user_id, "Вы нажали на кнопку 1")
+
+
+# Кнопка1
+@bot.message_handler(func=lambda user_message: user_message.text == "Кнопка2")
+def handle_text_message(user_message):
+    user_id = user_message.chat.id
+
+    # отправляем ответ пользователю
+    bot.send_message(user_id, "Вы нажали на кнопку 2")
 
 
 # обработка текстовых сообщений
