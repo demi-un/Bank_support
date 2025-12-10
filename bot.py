@@ -1,8 +1,8 @@
 import telebot
+from telebot import types
 from langchain.schema import HumanMessage, SystemMessage
 from langchain_community.chat_models.gigachat import GigaChat
 
-# -----------------------------------------------------------------------------
 # получение API_KEY и TOKEN из .env
 API_KEY = ""
 TOKEN = ""
@@ -17,11 +17,9 @@ with open(".env") as f:
         if line.startswith("TOKEN="):
             TOKEN = line[len("TOKEN="):].strip()
 
-# -----------------------------------------------------------------------------
-# импорт семантического поиска (если используешь)
+# импорт семантического поиска
 from database import dbsearch
 
-# -----------------------------------------------------------------------------
 # LLM
 giga = GigaChat(
     credentials=API_KEY,
@@ -52,34 +50,71 @@ SYSTEM_PROMPT = [
 """)
 ]
 
-# -----------------------------------------------------------------------------
 # история пользователей
 users_history = {}
+
 
 # функция вызова LLM
 def llm(user_message, user_history):
     # поиск в базе по вопросу пользователя
     db_results = dbsearch(user_message)
 
-    user_history.append(HumanMessage(content=user_message + f"; СИСТЕМНОЕ СООБЩЕНИЕ: Контекст из базы данных (используй его, если он помогает ответить на заданный вопрос):\n{db_results}"))
+    user_history.append(HumanMessage(
+        content=user_message + f"; СИСТЕМНОЕ СООБЩЕНИЕ: Контекст из базы данных (используй его, если он помогает ответить на заданный вопрос):\n{db_results}"))
 
     gigachat_answer = giga.invoke(user_history)
     user_history.append(gigachat_answer)
 
     return gigachat_answer.content, user_history
 
-# -----------------------------------------------------------------------------
+
 # инициализация бота
 bot = telebot.TeleBot(TOKEN)
 
-# -----------------------------------------------------------------------------
+# /start
+start_message = """
+Стартовое сообщение
+"""
+
+
+@bot.message_handler(commands=['start'])
+def start(user_message):
+    # клавиатура
+    kb = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
+    btn1 = types.KeyboardButton(text="Кнопка1")
+    btn2 = types.KeyboardButton(text="Кнопка2")
+    kb.add(btn1, btn2)
+
+    # отправка сообщения
+    user_id = user_message.chat.id
+    bot.send_message(user_id, start_message, reply_markup=kb)
+
+
 # обработка всех не текстовых сообщений
 @bot.message_handler(content_types=['audio', 'video', 'document', 'photo', 'sticker', 'voice', 'location', 'contact'])
 def not_text(user_message):
     user_id = user_message.chat.id
     bot.send_message(user_id, "Я работаю только с текстовыми сообщениями")
 
-# -----------------------------------------------------------------------------
+
+# Кнопка1
+@bot.message_handler(func=lambda user_message: user_message.text == "Кнопка1")
+def handle_text_message(user_message):
+    user_id = user_message.chat.id
+
+    # отправляем ответ пользователю
+    bot.send_message(user_id, "Вы нажали на кнопку 1")
+
+
+# Кнопка1
+@bot.message_handler(func=lambda user_message: user_message.text == "Кнопка2")
+def handle_text_message(user_message):
+    user_id = user_message.chat.id
+
+    # отправляем ответ пользователю
+    bot.send_message(user_id, "Вы нажали на кнопку 2")
+
+
 # обработка текстовых сообщений
 @bot.message_handler(content_types=['text'])
 def handle_text_message(user_message):
@@ -100,7 +135,7 @@ def handle_text_message(user_message):
     # отправляем ответ пользователю
     bot.send_message(user_id, gigachat_answer)
 
-# -----------------------------------------------------------------------------
+
 # запуск бота
 if __name__ == "__main__":
     print("Бот запущен...")
