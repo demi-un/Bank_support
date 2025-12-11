@@ -2,28 +2,27 @@ import chromadb
 from sentence_transformers import SentenceTransformer
 import json
 
-
-# data - словарь "вопрос": "ответ"
 with open("data.json") as f:
-    data = json.load(f) 
+    data = json.load(f)
+
+model = SentenceTransformer("intfloat/multilingual-e5-base")
 
 
-# инициализация векторизатора
-model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
+def encode(texts):
+    prefixed = [f"query: {t}" for t in texts]
+    return model.encode(prefixed, normalize_embeddings=True).tolist()
 
-# создаём/подключаем Chroma
+
 client = chromadb.PersistentClient(path="maindb")
 collection = client.get_or_create_collection(
     name="faq",
-    metadata={"hnsw:space": "cosine"}  # метрика расстояния
+    metadata={"hnsw:space": "cosine"}
 )
 
-# формируем списки
 texts = list(data.keys())
 answers = list(data.values())
-embeddings = model.encode(texts).tolist()
+embeddings = encode(texts)
 
-# добавляем в коллекцию
 collection.add(
     ids=[f"id_{i}" for i in range(len(texts))],
     documents=texts,
@@ -32,28 +31,39 @@ collection.add(
 )
 
 
-def dbsearch(question: str, number_of_responses=2):
-    question_emb = model.encode([question]).tolist()
+def dbsearch(question: str, n_results=3, threshold=0.85):
+    q_emb = encode([question])
 
-    response = collection.query(
-        query_embeddings=question_emb,
-        n_results=number_of_responses
+    resp = collection.query(
+        query_embeddings=q_emb,
+        n_results=n_results,
+        include=["documents", "metadatas", "distances"]
     )
 
-    result = ""
+    results = []
+    for doc, meta, dist in zip(
+            resp["documents"][0],
+            resp["metadatas"][0],
+            resp["distances"][0]
+    ):
+        similarity = 1 - dist
+        if similarity >= threshold:
+            results.append((doc, meta["answer"], similarity))
 
-    response_questions = response['documents'][0]
-    response_answers = []
-    for answer in response['metadatas'][0]:
-        response_answers.append(answer['answer'])
-    for i in range(number_of_responses):
-        result += f"Вопрос №{i+1}: '{response_questions[i]}' "
-        result += f"Ответ к вопросу №{i+1}: '{response_answers[i]}';"
+    if not results:
+        return "Похоже, в базе нет подходящего ответа."
 
-    return result
+    out = ""
+    for i, (q, a, sim) in enumerate(results, start=1):
+        out += (
+            f"Совпадение №{i}: '{q}' "
+            f"(similarity={sim:.3f})\n"
+            f"Ответ: {a}\n\n"
+        )
+
+    return out.strip()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     question = input("Введите вопрос: ")
-    result = dbsearch(question)
-    print(result)
+    print(dbsearch(question))
