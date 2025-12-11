@@ -51,7 +51,7 @@ def dbsearch(question: str, n_results=3, threshold=0.85):
             results.append((doc, meta["answer"], similarity))
 
     if not results:
-        return "Похоже, в базе нет подходящего ответа."
+        return "в базе нет подходящего ответа"
 
     out = ""
     for i, (q, a, sim) in enumerate(results, start=1):
