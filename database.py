@@ -31,7 +31,7 @@ collection.add(
 )
 
 
-def dbsearch(question: str, n_results=3, threshold=0.85):
+def dbsearch(question: str, n_results=1, threshold=0.85):
     q_emb = encode([question])
 
     resp = collection.query(
@@ -57,7 +57,6 @@ def dbsearch(question: str, n_results=3, threshold=0.85):
     for i, (q, a, sim) in enumerate(results, start=1):
         out += (
             f"Совпадение №{i}: '{q}' "
-            f"(similarity={sim:.3f})\n"
             f"Ответ: {a}\n\n"
         )
 
