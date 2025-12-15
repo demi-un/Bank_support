@@ -91,10 +91,6 @@ def generate_answer(context: str, question: str) -> str:
 def operator_kb():
     kb = types.InlineKeyboardMarkup()
     kb.add(types.InlineKeyboardButton(
-        "Связаться с оператором",
-        callback_data="call_operator"
-    ))
-    kb.add(types.InlineKeyboardButton(
         "Завершить диалог",
         callback_data="end_dialog"
     ))
@@ -209,7 +205,14 @@ def handle_end(msg):
 
 @bot.callback_query_handler(func=lambda c: c.data == "end_dialog")
 def handle_end_button(call):
-    end_dialog(call.message.chat.id)
+    # кнопка только для оператора
+    if call.message.chat.id == OPERATOR_ID:
+        target_user_id = operator_busy
+        if target_user_id:
+            end_dialog(target_user_id)
+            bot.send_message(OPERATOR_ID, f"✅ Диалог с пользователем {target_user_id} завершен.")
+        else:
+            bot.send_message(OPERATOR_ID, "⚠️ Нет активного диалога для завершения.")
 
 # ================== CALL OPERATOR ==================
 
@@ -279,12 +282,25 @@ def handle_user(msg):
         bot.send_message(
             user_id,
             "К сожалению, по вашему вопросу нет информации. Я могу подключить оператора.",
-            reply_markup=operator_kb()
+            reply_markup=types.InlineKeyboardMarkup().add(
+                types.InlineKeyboardButton("Связаться с оператором", callback_data="call_operator")
+            )
         )
         return
 
     answer = generate_answer(db_result, text)
     bot.send_message(user_id, answer)
+
+# ================== НЕ ТЕКСТОВЫЕ СООБЩЕНИЯ ==================
+
+MEDIA_TYPES = ["photo", "video", "audio", "document", "sticker", "voice",
+               "video_note", "animation", "contact", "location", "venue"]
+
+@bot.message_handler(content_types=MEDIA_TYPES)
+def handle_non_text(msg):
+    user_id = msg.chat.id
+    if users_role.get(user_id) != "employee":
+        bot.send_message(user_id, "⚠️ Я работаю только с текстовыми сообщениями")
 
 # ================== RUN ==================
 
