@@ -4,6 +4,7 @@ from langchain.schema import HumanMessage, SystemMessage
 from langchain_community.chat_models.gigachat import GigaChat
 
 from datetime import datetime
+import json
 import uuid
 
 # ================== CONFIG ==================
@@ -61,10 +62,13 @@ ANSWER_PROMPT = SystemMessage(content="""
 
 users_state = {}          # bot | operator
 users_role = {}           # user | employee
-llm_enabled = {}          # True / False
-last_user_question = {}  # user_id: text
+llm_enabled = {}           # True / False
+last_user_question = {}    # user_id: text
+last_bot_answer = {}       # user_id: text
 tickets = {}
 operator_busy = None      # user_id или None
+
+RATINGS_FILE = "ratings.jsonl"
 
 # ================== HELPERS ==================
 
@@ -95,6 +99,36 @@ def operator_kb():
         callback_data="end_dialog"
     ))
     return kb
+
+
+def rating_kb():
+    kb = types.InlineKeyboardMarkup(row_width=5)
+    buttons = [
+        types.InlineKeyboardButton("1", callback_data="rate_1"),
+        types.InlineKeyboardButton("2", callback_data="rate_2"),
+        types.InlineKeyboardButton("3", callback_data="rate_3"),
+        types.InlineKeyboardButton("4", callback_data="rate_4"),
+        types.InlineKeyboardButton("5", callback_data="rate_5"),
+    ]
+    kb.add(*buttons)
+    return kb
+
+
+def save_rating(user_id: int, question: str, answer: str, rating: int):
+    record = {
+        "timestamp": datetime.now().isoformat(),
+        "user_id": user_id,
+        "question": question,
+        "answer": answer,
+        "rating": rating,
+    }
+
+    try:
+        with open(RATINGS_FILE, "a", encoding="utf-8") as f:
+            f.write(json.dumps(record, ensure_ascii=False) + "\n")
+    except Exception:
+        # если что-то пошло не так при сохранении — не ломаем основной поток
+        pass
 
 def register_kb():
     kb = types.InlineKeyboardMarkup()
@@ -248,6 +282,40 @@ def call_operator(call):
         "👨‍💼 Вы подключены к живому оператору."
     )
 
+
+@bot.callback_query_handler(func=lambda c: c.data.startswith("rate_"))
+def rate_answer(call):
+    user_id = call.message.chat.id
+
+    try:
+        rating = int(call.data.split("_", 1)[1])
+    except (ValueError, IndexError):
+        return
+
+    if rating < 1 or rating > 5:
+        return
+
+    question = last_user_question.get(user_id, "")
+    # текст сообщения, к которому прикреплены кнопки — это ответ бота
+    answer = call.message.text or last_bot_answer.get(user_id, "")
+
+    save_rating(user_id, question, answer, rating)
+
+    # убираем клавиатуру с оценками
+    try:
+        bot.edit_message_reply_markup(
+            chat_id=call.message.chat.id,
+            message_id=call.message.message_id,
+            reply_markup=None
+        )
+    except Exception:
+        pass
+
+    bot.answer_callback_query(
+        callback_query_id=call.id,
+        text=f"Спасибо за вашу оценку: {rating}/5"
+    )
+
 # ================== USER MESSAGE ==================
 
 @bot.message_handler(content_types=["text"])
@@ -289,7 +357,12 @@ def handle_user(msg):
         return
 
     answer = generate_answer(db_result, text)
-    bot.send_message(user_id, answer)
+    last_bot_answer[user_id] = answer
+    bot.send_message(
+        user_id,
+        answer,
+        reply_markup=rating_kb()
+    )
 
 # ================== НЕ ТЕКСТОВЫЕ СООБЩЕНИЯ ==================
 
