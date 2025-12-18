@@ -1,0 +1,149 @@
+[
+  {
+    "date": "01.10",
+    "time": "08:40",
+    "description": "Проезд — метро (Тройка)",
+    "amount": -60,
+    "category": "транспорт"
+  },
+  {
+    "date": "01.10",
+    "time": "13:10",
+    "description": "Столовая ВУЗа (обед)",
+    "amount": -320,
+    "category": "еда"
+  },
+  {
+    "date": "01.10",
+    "time": "19:30",
+    "description": "Пятёрочка",
+    "amount": -890,
+    "category": "продукты"
+  },
+  {
+    "date": "02.10",
+    "time": "09:00",
+    "description": "Кофе в автомате ВУЗа",
+    "amount": -120,
+    "category": "кофе"
+  },
+  {
+    "date": "02.10",
+    "time": "18:20",
+    "description": "Проезд — автобус",
+    "amount": -60,
+    "category": "транспорт"
+  },
+  {
+    "date": "03.10",
+    "time": "12:50",
+    "description": "Столовая ВУЗа (обед)",
+    "amount": -340,
+    "category": "еда"
+  },
+  {
+    "date": "03.10",
+    "time": "20:10",
+    "description": "Магнит",
+    "amount": -760,
+    "category": "продукты"
+  },
+  {
+    "date": "04.10",
+    "time": "10:00",
+    "description": "Перевод: Общежитие (месяц)",
+    "amount": -3500,
+    "category": "жильё"
+  },
+  {
+    "date": "04.10",
+    "time": "17:45",
+    "description": "Канцтовары (тетради, ручки)",
+    "amount": -540,
+    "category": "учёба"
+  },
+  {
+    "date": "05.10",
+    "time": "14:00",
+    "description": "Столовая ВУЗа (обед)",
+    "amount": -310,
+    "category": "еда"
+  },
+  {
+    "date": "06.10",
+    "time": "18:30",
+    "description": "Пятёрочка",
+    "amount": -1120,
+    "category": "продукты"
+  },
+  {
+    "date": "07.10",
+    "time": "11:20",
+    "description": "Кофейня рядом с ВУЗом",
+    "amount": -260,
+    "category": "кофе"
+  },
+  {
+    "date": "07.10",
+    "time": "20:00",
+    "description": "Подписка: Яндекс Музыка (студенческая)",
+    "amount": -199,
+    "category": "подписки"
+  },
+  {
+    "date": "08.10",
+    "time": "13:00",
+    "description": "Столовая ВУЗа (обед)",
+    "amount": -330,
+    "category": "еда"
+  },
+  {
+    "date": "09.10",
+    "time": "16:40",
+    "description": "Аптека (витамины)",
+    "amount": -480,
+    "category": "здоровье"
+  },
+  {
+    "date": "10.10",
+    "time": "19:10",
+    "description": "Додо Пицца (скидка студенту)",
+    "amount": -690,
+    "category": "еда"
+  },
+  {
+    "date": "11.10",
+    "time": "12:30",
+    "description": "Столовая ВУЗа (обед)",
+    "amount": -300,
+    "category": "еда"
+  },
+  {
+    "date": "12.10",
+    "time": "18:00",
+    "description": "Проезд — метро",
+    "amount": -60,
+    "category": "транспорт"
+  },
+  {
+    "date": "13.10",
+    "time": "15:20",
+    "description": "Ozon (флешка, кабель USB)",
+    "amount": -980,
+    "category": "учёба"
+  },
+  {
+    "date": "14.10",
+    "time": "21:00",
+    "description": "Кинотеатр (студенческий билет)",
+    "amount": -450,
+    "category": "развлечения"
+  },
+  {
+    "date": "15.10",
+    "time": "17:30",
+    "description": "Магнит",
+    "amount": -870,
+    "category": "продукты"
+  }
+]
