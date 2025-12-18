@@ -6,8 +6,8 @@ from telebot import types
 
 from database import dbsearch
 from .config import TOKEN, OPERATOR_ID
-from .keyboards import register_kb, rating_kb
-from .llm import classify_question, generate_answer, analyze_expenses
+from .keyboards import register_kb, answer_kb
+from .llm import classify_question, generate_answer, analyze_expenses, get_recommendation_tags
 from .state import (
     users_state,
     users_role,
@@ -232,13 +232,35 @@ def rate_answer(call):
 
     save_rating(user_id, question, answer, rating)
 
-    # убираем клавиатуру с оценками
+    # убираем ТОЛЬКО ряд с оценками, оставляя кнопки-ссылки
     try:
-        bot.edit_message_reply_markup(
-            chat_id=call.message.chat.id,
-            message_id=call.message.message_id,
-            reply_markup=None
-        )
+        original = call.message.reply_markup
+        if original and original.keyboard:
+            from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
+
+            new_kb = InlineKeyboardMarkup()
+            for row in original.keyboard:
+                # оставляем в ряду только кнопки, не относящиеся к оценке
+                new_row = []
+                for btn in row:
+                    # у URL-кнопок callback_data == None, у наших оценок — "rate_X"
+                    if getattr(btn, "callback_data", None) and str(btn.callback_data).startswith("rate_"):
+                        continue
+                    new_row.append(
+                        InlineKeyboardButton(
+                            text=btn.text,
+                            url=getattr(btn, "url", None),
+                            callback_data=getattr(btn, "callback_data", None)
+                        )
+                    )
+                if new_row:
+                    new_kb.row(*new_row)
+
+            bot.edit_message_reply_markup(
+                chat_id=call.message.chat.id,
+                message_id=call.message.message_id,
+                reply_markup=new_kb
+            )
     except Exception:
         pass
 
@@ -290,10 +312,26 @@ def handle_user(msg):
 
     answer = generate_answer(db_result, text)
     last_bot_answer[user_id] = answer
+
+    # определяем, какие разделы сайта Сбера порекомендовать
+    tags = get_recommendation_tags(text, answer)
+    links_map = {
+        "cards": ("💳 Карты", "https://www.sberbank.ru/ru/person/bank_cards"),
+        "deposits": ("💰 Вклады", "https://www.sberbank.ru/ru/person/contributions"),
+        "mortgage": ("🏠 Ипотека", "https://www.sberbank.ru/ru/person/mortgagelending"),
+        "credits": ("📄 Кредиты", "https://www.sberbank.ru/ru/person/credits"),
+        "payments": ("🧾 Платежи", "https://www.sberbank.ru/ru/person/payments"),
+        "transfers": ("📨 Переводы", "https://www.sberbank.ru/ru/person/transfers"),
+        "insurance": ("🛡 Страхование", "https://www.sberbank.ru/ru/person/insurance"),
+        "investments": ("📈 Инвестиции", "https://www.sberbank.ru/ru/person/investments"),
+        "support": ("📞 Поддержка", "https://www.sberbank.ru/ru/person/paymentsandtransfers/help"),
+    }
+    links = [links_map[t] for t in tags if t in links_map]
+
     bot.send_message(
         user_id,
         answer,
-        reply_markup=rating_kb(),
+        reply_markup=answer_kb(links),
         parse_mode="Markdown"
     )
 
