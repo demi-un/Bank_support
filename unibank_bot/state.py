@@ -14,6 +14,9 @@ last_bot_answer: Dict[int, str] = {}      # user_id: text
 tickets: Dict[int, Dict[str, Any]] = {}
 operator_busy: int | None = None          # user_id или None
 analysis_waiting_file: Dict[int, bool] = {}  # user_id: bool
+waiting_employee_password: Dict[int, bool] = {}  # user_id: bool - ожидание пароля для сотрудника
+
+EMPLOYEE_PASSWORD = "qwerty"
 
 
 RATINGS_FILE = "ratings.jsonl"

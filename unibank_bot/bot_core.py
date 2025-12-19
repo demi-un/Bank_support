@@ -18,6 +18,8 @@ from .state import (
     analysis_waiting_file,
     operator_busy,
     save_rating,
+    waiting_employee_password,
+    EMPLOYEE_PASSWORD,
 )
 
 
@@ -56,7 +58,7 @@ def start(msg):
         "Я помогу:\n"
         "• ответить на вопросы по продуктам и сервисам\n"
         "• передать запрос оператору\n"
-        "• сделать краткий анализ ваших расходов (/analise)\n\n"
+        "• сделать анализ ваших расходов (/analise)\n\n"
         "Выберите роль:",
         reply_markup=register_kb()
     )
@@ -78,16 +80,10 @@ def register(call):
         )
 
     if call.data == "reg_employee":
-        users_role[user_id] = "employee"
-        users_state[user_id] = "operator"
-        llm_enabled[user_id] = False
-
+        waiting_employee_password[user_id] = True
         bot.send_message(
             user_id,
-            "✅ Вы зарегистрированы как сотрудник.\n\n"
-            "Команды:\n"
-            "/reply <user_id> <текст> — ответ клиенту\n"
-            "/end <user_id> — завершить диалог с клиентом."
+            "🔐 Для доступа к панели сотрудника введите пароль:"
         )
 
 
@@ -124,13 +120,14 @@ def start_analysis(msg):
 
     bot.send_message(
         user_id,
-        "📂 Для анализа расходов отправьте JSON-файл с историей трат как документ.\n\n"
-        "Формат операции:\n"
-        '{"date": "01.10", '
-        '"time": "09:00", '
-        '"description": "...", '
-        '"amount": -85000, '
-        '"category": "аренда"}'
+        """
+        📂 Для анализа расходов отправьте JSON-файл с историей трат как документ.
+        Формат операции:
+        {"date": "01.10",
+        "time": "09:00", 
+        "description": "...", 
+        "amount": -85000, 
+        "category": "аренда"}"""
     )
 
 
@@ -273,6 +270,28 @@ def rate_answer(call):
 def handle_user(msg):
     user_id = msg.chat.id
     text = msg.text
+
+    # Проверка пароля для сотрудника
+    if waiting_employee_password.get(user_id):
+        if text.strip() == EMPLOYEE_PASSWORD:
+            waiting_employee_password[user_id] = False
+            users_role[user_id] = "employee"
+            users_state[user_id] = "operator"
+            llm_enabled[user_id] = False
+            
+            bot.send_message(
+                user_id,
+                "✅ Вы авторизованы как сотрудник.\n\n"
+                "Команды:\n"
+                "/reply <user_id> <текст> — ответ клиенту\n"
+                "/end <user_id> — завершить диалог с клиентом."
+            )
+        else:
+            bot.send_message(
+                user_id,
+                "❌ Неверный пароль. Попробуйте ещё раз или выберите роль заново (/start)."
+            )
+        return
 
     if users_role.get(user_id) == "employee":
         return
