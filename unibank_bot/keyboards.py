@@ -62,3 +62,29 @@ def rating_kb() -> types.InlineKeyboardMarkup:
     return kb
 
 
+def main_menu_kb() -> types.InlineKeyboardMarkup:
+    """
+    Главное меню бота с быстрыми действиями.
+    """
+    kb = types.InlineKeyboardMarkup(row_width=2)
+    kb.add(
+        types.InlineKeyboardButton("💳 Карты", callback_data="menu_cards"),
+        types.InlineKeyboardButton("💰 Вклады", callback_data="menu_deposits"),
+        types.InlineKeyboardButton("🏠 Ипотека", callback_data="menu_mortgage"),
+        types.InlineKeyboardButton("📄 Кредиты", callback_data="menu_credits"),
+        types.InlineKeyboardButton("🧾 Платежи", callback_data="menu_payments"),
+        types.InlineKeyboardButton("📨 Переводы", callback_data="menu_transfers"),
+        types.InlineKeyboardButton("📊 Анализ расходов", callback_data="menu_analysis"),
+    )
+    return kb
+
+
+def back_to_menu_kb() -> types.InlineKeyboardMarkup:
+    """
+    Кнопка возврата в главное меню.
+    """
+    kb = types.InlineKeyboardMarkup()
+    kb.add(types.InlineKeyboardButton("🏠 Главное меню", callback_data="main_menu"))
+    return kb
+
+
