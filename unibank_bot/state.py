@@ -6,18 +6,17 @@ from typing import Dict, Any
 
 # ================== РАЗДЕЛ ПАМЯТИ БОТА ==================
 
-users_state: Dict[int, str] = {}          # bot | operator
-users_role: Dict[int, str] = {}           # user | employee
-llm_enabled: Dict[int, bool] = {}         # True / False
-last_user_question: Dict[int, str] = {}   # user_id: text
-last_bot_answer: Dict[int, str] = {}      # user_id: text
+users_state: Dict[int, str] = {}  # bot | operator
+users_role: Dict[int, str] = {}  # user | employee
+llm_enabled: Dict[int, bool] = {}  # True / False
+last_user_question: Dict[int, str] = {}  # user_id: text
+last_bot_answer: Dict[int, str] = {}  # user_id: text
 tickets: Dict[int, Dict[str, Any]] = {}
-operator_busy: int | None = None          # user_id или None
+operator_busy: int | None = None  # user_id или None
 analysis_waiting_file: Dict[int, bool] = {}  # user_id: bool
 waiting_employee_password: Dict[int, bool] = {}  # user_id: bool - ожидание пароля для сотрудника
 
 EMPLOYEE_PASSWORD = "qwerty"
-
 
 RATINGS_FILE = "ratings.jsonl"
 
@@ -42,3 +41,12 @@ def save_rating(user_id: int, question: str, answer: str, rating: int) -> None:
         pass
 
 
+def reset_user_state(user_id: int) -> None:
+    users_state.pop(user_id, None)
+    users_role.pop(user_id, None)
+    llm_enabled.pop(user_id, None)
+    last_user_question.pop(user_id, None)
+    last_bot_answer.pop(user_id, None)
+    analysis_waiting_file.pop(user_id, None)
+    waiting_employee_password.pop(user_id, None)
+    tickets.pop(user_id, None)
